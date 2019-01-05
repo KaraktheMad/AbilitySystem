@@ -44,6 +44,12 @@
 *.VC.db
 *.VC.opendb
 
+# Ignore Shinbi and Starter Content
+*/ParagonShinbi
+*/StarterContent
+*/FirstPerson
+*/FirstPersonCPP
+
 # Precompiled Assets
 SourceArt/**/*.png
 SourceArt/**/*.tga

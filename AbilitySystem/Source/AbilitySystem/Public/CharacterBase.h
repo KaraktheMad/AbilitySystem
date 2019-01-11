@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemInterface.h"
+#include "GameplayTagContainer.h"
 //#include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemComponent.h"
 //#include "GameplayAbilities/Public/AbilitySystemComponent.h"
 #include "CharacterBase.generated.h"
@@ -12,6 +13,7 @@
 class UAbilitySystemComponent;
 class UGameplayAbility;
 class UAttributeSetBase;
+struct FGameplayTag;
 
 UCLASS()
 class ABILITYSYSTEM_API ACharacterBase : public ACharacter, public IAbilitySystemInterface
@@ -44,6 +46,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CharacterBase")
 	void AquireAbility(TSubclassOf<UGameplayAbility> AbilityToAquire);
 
+
+	// Health
 	UFUNCTION()
 	void OnHealthChanged(float Health, float MaxHealth);
 
@@ -51,5 +55,47 @@ public:
 	void BP_OnHealthChanged(float Health, float MaxHealth);
 
 
+	// Mana
+	UFUNCTION()
+	void OnManaChanged(float Mana, float MaxMana);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "CharacterBase", meta = (DisplayName = "OnManaChanged"))
+	void BP_OnManaChanged(float Mana, float MaxMana);
+
+
+	// Strength
+	UFUNCTION()
+	void OnStrengthChanged(float Strength, float MaxStrength);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "CharacterBase", meta = (DisplayName = "OnStrengthChanged"))
+	void BP_OnStrengthChanged(float Strength, float MaxStrength);
+
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "CharacterBase", meta = (DisplayName = "Die"))
+	void BP_Die();
+
+	UFUNCTION(BlueprintCallable, Category = "CharacterBase")
+	bool IsOtherHostile(ACharacterBase* Other);
+
+	uint8 GetTeamID() const;
+
+	UFUNCTION(BlueprintCallable, Category = "CharacterBase")
+	void AddGameplayTag(FGameplayTag& TagToAdd);
+
+	UFUNCTION(BlueprintCallable, Category = "CharacterBase")
+	void RemoveGameplayTag(FGameplayTag& TagToRemove);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterBase")
+	FGameplayTag FullHealthTag;
+
+protected:
+
+	bool bIsDead;
+
+	uint8 TeamID;
+
+	void AutoDetermineTeamIDbyControllerType();
+
+	void Dead();
 
 };

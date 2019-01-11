@@ -5,6 +5,9 @@
 #include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/Abilities/GameplayAbility.h"
 #include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/GameplayAbilitySpec.h"
 #include "Public/AttributeSetBase.h"
+#include "AIController.h"
+#include "GameFramework/PlayerController.h"
+#include "AIModule/Classes/BrainComponent.h"
 
 // Sets default values
 ACharacterBase::ACharacterBase()
@@ -15,13 +18,24 @@ ACharacterBase::ACharacterBase()
 	AbilitySystemComp = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComp"));
 	AttributeSetBaseComp = CreateDefaultSubobject<UAttributeSetBase>(TEXT("AttributeSetBaseComp"));
 
+	bIsDead = false;
+
+	TeamID = 255;
+
 }
 
 // Called when the game starts or when spawned
 void ACharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
+
 	AttributeSetBaseComp->OnHealthChange.AddDynamic(this, &ACharacterBase::OnHealthChanged);
+	AttributeSetBaseComp->OnManaChange.AddDynamic(this, &ACharacterBase::OnManaChanged);
+	AttributeSetBaseComp->OnStrengthChange.AddDynamic(this, &ACharacterBase::OnStrengthChanged);
+
+	AutoDetermineTeamIDbyControllerType();
+
+	AddGameplayTag(FullHealthTag);
 	
 }
 
@@ -67,6 +81,71 @@ void ACharacterBase::AquireAbility(TSubclassOf<UGameplayAbility> AbilityToAquire
 
 void ACharacterBase::OnHealthChanged(float Health, float MaxHealth)
 {
+	if (Health <= 0.0f && !bIsDead)
+	{
+		bIsDead = true;
+		Dead();
+		BP_Die();
+	}
+
 	BP_OnHealthChanged(Health, MaxHealth);
+}
+
+void ACharacterBase::OnManaChanged(float Mana, float MaxMana)
+{
+	BP_OnManaChanged(Mana, MaxMana);
+}
+
+void ACharacterBase::OnStrengthChanged(float Strength, float MaxStrength)
+{
+	BP_OnStrengthChanged(Strength, MaxStrength);
+}
+
+bool ACharacterBase::IsOtherHostile(ACharacterBase* Other)
+{
+	return TeamID != Other->GetTeamID();
+}
+
+uint8 ACharacterBase::GetTeamID() const
+{
+	return TeamID;
+}
+
+
+void ACharacterBase::AddGameplayTag(FGameplayTag& TagToAdd)
+{
+	GetAbilitySystemComponent()->AddLooseGameplayTag(TagToAdd);
+
+	// clamp the tag count to 1
+	GetAbilitySystemComponent()->SetTagMapCount(TagToAdd, 1);
+}
+
+void ACharacterBase::RemoveGameplayTag(FGameplayTag& TagToRemove)
+{
+	GetAbilitySystemComponent()->RemoveLooseGameplayTag(TagToRemove);
+}
+
+
+void ACharacterBase::AutoDetermineTeamIDbyControllerType()
+{
+	if (GetController() && GetController()->IsPlayerController())
+	{
+		TeamID = 0;
+	}
+}
+
+void ACharacterBase::Dead()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC)
+	{
+		PC->DisableInput(PC);
+	}
+
+	AAIController* AIC = Cast<AAIController>(GetController());
+	if (AIC)
+	{
+		AIC->GetBrainComponent()->StopLogic("Dead");
+	}
 }
 

@@ -8,6 +8,7 @@
 #include "AIController.h"
 #include "GameFramework/PlayerController.h"
 #include "AIModule/Classes/BrainComponent.h"
+#include "GameFramework/Actor.h"
 
 // Sets default values
 ACharacterBase::ACharacterBase()
@@ -126,6 +127,8 @@ void ACharacterBase::RemoveGameplayTag(FGameplayTag& TagToRemove)
 }
 
 
+
+
 void ACharacterBase::AutoDetermineTeamIDbyControllerType()
 {
 	if (GetController() && GetController()->IsPlayerController())
@@ -135,6 +138,11 @@ void ACharacterBase::AutoDetermineTeamIDbyControllerType()
 }
 
 void ACharacterBase::Dead()
+{
+	DisableInputControl();
+}
+
+void ACharacterBase::DisableInputControl()
 {
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	if (PC)
@@ -147,5 +155,31 @@ void ACharacterBase::Dead()
 	{
 		AIC->GetBrainComponent()->StopLogic("Dead");
 	}
+}
+
+void ACharacterBase::EnableInputControl()
+{
+	if (!bIsDead)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		if (PC)
+		{
+			PC->EnableInput(PC);
+		}
+
+		AAIController* AIC = Cast<AAIController>(GetController());
+		if (AIC)
+		{
+			AIC->GetBrainComponent()->RestartLogic();
+		}
+	}
+	
+}
+
+void ACharacterBase::HitStun(float StunDuration)
+{
+	DisableInputControl();
+
+	GetWorldTimerManager().SetTimer(StunTimeHandle, this, &ACharacterBase::EnableInputControl, StunDuration, false);
 }
 

@@ -88,6 +88,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CharacterBase")
 	FGameplayTag FullHealthTag;
 
+	UFUNCTION(BlueprintCallable, Category = "CharacterBase")
+	void HitStun(float StunDuration);
+
 protected:
 
 	bool bIsDead;
@@ -97,5 +100,11 @@ protected:
 	void AutoDetermineTeamIDbyControllerType();
 
 	void Dead();
+
+	void DisableInputControl();
+
+	void EnableInputControl();
+
+	FTimerHandle StunTimeHandle;
 
 };

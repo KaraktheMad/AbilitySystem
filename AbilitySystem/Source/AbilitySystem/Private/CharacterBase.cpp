@@ -9,6 +9,8 @@
 #include "GameFramework/PlayerController.h"
 #include "AIModule/Classes/BrainComponent.h"
 #include "GameFramework/Actor.h"
+#include "Public/PlayerControllerBase.h"
+#include "Public/GameplayAbilityBase.h"
 
 // Sets default values
 ACharacterBase::ACharacterBase()
@@ -77,6 +79,23 @@ void ACharacterBase::AquireAbility(TSubclassOf<UGameplayAbility> AbilityToAquire
 		}
 
 		AbilitySystemComp->InitAbilityActorInfo(this, this);
+	}
+}
+
+// Aquire multiple abilities
+void ACharacterBase::AquireAbilities(TArray<TSubclassOf<UGameplayAbility>> AbilityToAquire)
+{
+	for (TSubclassOf<UGameplayAbility> AbilityItem : AbilityToAquire)
+	{
+		AquireAbility(AbilityItem);
+		if (AbilityItem->IsChildOf(UGameplayAbilityBase::StaticClass()))
+		{
+			TSubclassOf<UGameplayAbilityBase> AbilityBaseClass = *AbilityItem;
+			if (AbilityBaseClass)
+			{
+				AddAbilityToUI(AbilityBaseClass);
+			}
+		}
 	}
 }
 
@@ -175,6 +194,22 @@ void ACharacterBase::EnableInputControl()
 	}
 	
 }
+
+
+void ACharacterBase::AddAbilityToUI(TSubclassOf<UGameplayAbilityBase> AbilityToAdd)
+{
+	APlayerControllerBase* PlayerControllerBase = Cast<APlayerControllerBase>(GetController());
+	if (PlayerControllerBase)
+	{
+		UGameplayAbilityBase* AbilityInstance = AbilityToAdd.Get()->GetDefaultObject<UGameplayAbilityBase>();
+		if (AbilityInstance)
+		{
+			FGameplayAbilityInfo AbilityInfo = AbilityInstance->GetAbilityInfo();
+			PlayerControllerBase->AddAbilityToUI(AbilityInfo);
+		}
+	}
+}
+
 
 void ACharacterBase::HitStun(float StunDuration)
 {

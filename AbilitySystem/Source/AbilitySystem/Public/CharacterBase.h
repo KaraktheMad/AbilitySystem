@@ -10,8 +10,9 @@
 //#include "GameplayAbilities/Public/AbilitySystemComponent.h"
 #include "CharacterBase.generated.h"
 
+
 class UAbilitySystemComponent;
-class UGameplayAbility;
+class UGameplayAbilityBase;
 class UAttributeSetBase;
 struct FGameplayTag;
 
@@ -45,6 +46,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterBase")
 	void AquireAbility(TSubclassOf<UGameplayAbility> AbilityToAquire);
+
+	UFUNCTION(BlueprintCallable, Category = "CharacterBase")
+	void AquireAbilities(TArray<TSubclassOf<UGameplayAbility>> AbilityToAquire);
 
 
 	// Health
@@ -106,5 +110,7 @@ protected:
 	void EnableInputControl();
 
 	FTimerHandle StunTimeHandle;
+
+	void AddAbilityToUI(TSubclassOf<UGameplayAbilityBase> AbilityToAdd);
 
 };

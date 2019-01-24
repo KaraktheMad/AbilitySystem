@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemInterface.h"
 #include "GameplayTagContainer.h"
+#include "GameplayEffectTypes.h"
+#include "GameplayAbilityTargetTypes.h"
 //#include "../Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemComponent.h"
 //#include "GameplayAbilities/Public/AbilitySystemComponent.h"
 #include "CharacterBase.generated.h"
@@ -15,6 +17,8 @@ class UAbilitySystemComponent;
 class UGameplayAbilityBase;
 class UAttributeSetBase;
 struct FGameplayTag;
+//struct FGameplayEffectSpecHandle;
+//struct FGameplayAbilityTargetDataHandle;
 
 UCLASS()
 class ABILITYSYSTEM_API ACharacterBase : public ACharacter, public IAbilitySystemInterface
@@ -94,6 +98,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "CharacterBase")
 	void HitStun(float StunDuration);
+
+	// Normally you would create a library with these types 
+	UFUNCTION(BlueprintCallable, Category = "CharacterBase")
+	void ApplyGESpecHandleToTargetDataSpecHandle(const FGameplayEffectSpecHandle& GESpecHandle, const FGameplayAbilityTargetDataHandle& TargetDataHandle);
 
 protected:
 

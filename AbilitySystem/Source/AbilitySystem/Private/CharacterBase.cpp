@@ -11,6 +11,8 @@
 #include "GameFramework/Actor.h"
 #include "Public/PlayerControllerBase.h"
 #include "Public/GameplayAbilityBase.h"
+#include "GameplayEffectTypes.h"
+#include "GameplayAbilityTargetTypes.h"
 
 // Sets default values
 ACharacterBase::ACharacterBase()
@@ -216,5 +218,13 @@ void ACharacterBase::HitStun(float StunDuration)
 	DisableInputControl();
 
 	GetWorldTimerManager().SetTimer(StunTimeHandle, this, &ACharacterBase::EnableInputControl, StunDuration, false);
+}
+
+void ACharacterBase::ApplyGESpecHandleToTargetDataSpecHandle(const FGameplayEffectSpecHandle& GESpecHandle, const FGameplayAbilityTargetDataHandle& TargetDataHandle)
+{
+	for (TSharedPtr<FGameplayAbilityTargetData> Data : TargetDataHandle.Data)
+	{
+		Data->ApplyGameplayEffectSpec(*GESpecHandle.Data.Get());
+	}
 }
 
